@@ -536,6 +536,43 @@
     for (const d of [-1, 1]) { c.beginPath(); c.arc(x + d * h * 0.26, base - h * 0.82, h * 0.1, 0, TAU); c.stroke(); }
     c.fillStyle = "rgba(255,255,255,.4)"; c.fillRect(x - h * 0.15, base - h * 0.95, h * 0.05, h * 0.3);
   }
+  // Tiered trophy: marble plinth, `tiers` stacked columns + platforms narrowing upward, cup on top
+  function tieredTrophy(c, x, base, h, tiers, col, colDark) {
+    const plH = h * 0.12, plW = h * 0.5;
+    c.fillStyle = "#2a2018"; c.fillRect(x - plW / 2, base - plH, plW, plH);
+    c.fillStyle = "rgba(255,255,255,.12)"; c.fillRect(x - plW / 2, base - plH, plW, 2);
+    let y = base - plH, w = plW * 0.86;
+    const tierH = (h * 0.62) / tiers;
+    for (let i = 0; i < tiers; i++) {
+      // columns
+      const cw = Math.max(2, w * 0.09);
+      for (const d of tiers > 1 ? [-1, 1] : [0]) {
+        c.fillStyle = col; c.fillRect(x + d * w * 0.34 - cw / 2, y - tierH * 0.8, cw, tierH * 0.8);
+        c.fillStyle = "rgba(255,255,255,.35)"; c.fillRect(x + d * w * 0.34 - cw / 2, y - tierH * 0.8, Math.max(1, cw * 0.35), tierH * 0.8);
+      }
+      if (tiers > 1) { c.fillStyle = colDark; c.fillRect(x - cw / 2, y - tierH * 0.8, cw, tierH * 0.8); }
+      // platform
+      y -= tierH * 0.8;
+      c.fillStyle = colDark; c.fillRect(x - w / 2, y - tierH * 0.2, w, tierH * 0.2);
+      c.fillStyle = col; c.fillRect(x - w / 2, y - tierH * 0.2, w, Math.max(1.5, tierH * 0.08));
+      y -= tierH * 0.2; w *= 0.78;
+    }
+    // cup
+    const ch = h * 0.26, cw2 = Math.max(w * 0.9, h * 0.2);
+    c.fillStyle = col; c.fillRect(x - ch * 0.08, y - ch * 0.35, ch * 0.16, ch * 0.35);
+    c.beginPath(); c.moveTo(x - cw2 / 2, y - ch * 1.35); c.lineTo(x + cw2 / 2, y - ch * 1.35);
+    c.quadraticCurveTo(x + cw2 * 0.46, y - ch * 0.35, x, y - ch * 0.35); c.quadraticCurveTo(x - cw2 * 0.46, y - ch * 0.35, x - cw2 / 2, y - ch * 1.35); c.fill();
+    c.strokeStyle = col; c.lineWidth = Math.max(1.5, h * 0.025);
+    for (const d of [-1, 1]) { c.beginPath(); c.arc(x + d * cw2 * 0.55, y - ch, ch * 0.22, 0, TAU); c.stroke(); }
+    c.fillStyle = "rgba(255,255,255,.45)"; c.fillRect(x - cw2 * 0.3, y - ch * 1.28, Math.max(1.5, cw2 * 0.1), ch * 0.6);
+    if (tiers > 2) { // star topper on the grand trophy
+      c.fillStyle = col; c.beginPath();
+      for (let i = 0; i < 10; i++) { const an = -Math.PI / 2 + (i * Math.PI) / 5, rr2 = i % 2 ? ch * 0.16 : ch * 0.38;
+        c.lineTo(x + Math.cos(an) * rr2, y - ch * 1.7 + Math.sin(an) * rr2); }
+      c.closePath(); c.fill();
+    }
+  }
+
   // A band block in silhouette (rows of little marchers with plumes)
   function bandBlock(c, x0, y0, cols, rows, col, plume) {
     for (let r = 0; r < rows; r++) for (let k = 0; k < cols; k++) {
@@ -819,9 +856,17 @@
           turf(c, W, H, G, true);
           // bands lined up in block on the far side (dim, behind the action line)
           // trophy table between sling and rivals
-          c.fillStyle = "#1a1410"; c.fillRect(470, 600, 170, 8); c.fillRect(480, 608, 6, 32); c.fillRect(624, 608, 6, 32);
-          c.fillStyle = "#e9e4d8"; c.fillRect(470, 596, 170, 6);
-          trophy(c, 505, 596, 34, "#e8b830"); trophy(c, 555, 596, 52, "#ffd25a"); trophy(c, 605, 596, 40, "#c9ced6");
+          c.fillStyle = "#1a1410"; c.fillRect(392, 600, 272, 8); c.fillRect(402, 608, 6, 32); c.fillRect(648, 608, 6, 32);
+          c.fillStyle = "#e9e4d8"; c.fillRect(392, 596, 272, 6);
+          c.fillStyle = "#7a1018"; c.fillRect(392, 602, 272, 14); // table skirt
+          const G1 = "#ffd25a", G2 = "#a8780a", S1 = "#dfe5ec", S2 = "#7a8696", B1 = "#d9904a", B2 = "#7a4a1a";
+          trophy(c, 414, 596, 30, G1);                     // single-tier
+          tieredTrophy(c, 450, 596, 66, 2, S1, S2);        // two-tier
+          trophy(c, 488, 596, 34, B1);                     // single-tier
+          tieredTrophy(c, 530, 596, 118, 4, G1, G2);       // grand champion, four tiers
+          trophy(c, 572, 596, 32, S1);                     // single-tier
+          tieredTrophy(c, 608, 596, 72, 3, G1, G2);        // three-tier
+          trophy(c, 644, 596, 30, B1);                     // single-tier
           for (const x of [64, 1226]) lightTower(c, x, 92, G, 0.3);
           const sg = c.createRadialGradient(217, 470, 10, 217, 470, 230);
           sg.addColorStop(0, "rgba(255,250,225,.22)"); sg.addColorStop(1, "rgba(255,250,225,0)");

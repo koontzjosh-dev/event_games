@@ -582,6 +582,125 @@
     }
   }
 
+  /* ---------- level 6: the bus ride home ---------- */
+  let SN = null; // engine helpers, captured from sounds()
+  const BUS = 5; // level index
+  const KT = { stage: 0, groups: [], won: false };
+  const TX = 500; // trophy center x
+  // where each trophy stage appears (for the reveal burst)
+  const STAGE_AT = [[TX, 575], [TX, 470], [TX, 250], [TX, 230]];
+
+  function pisgahP(c, x, y, size) {
+    c.save(); c.font = `900 ${size}px "Arial Black","Trebuchet MS",sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
+    c.lineJoin = "round";
+    c.lineWidth = size * 0.16; c.strokeStyle = "#111"; c.strokeText("P", x, y);
+    c.lineWidth = size * 0.07; c.strokeStyle = "#fff"; c.strokeText("P", x, y);
+    const g = c.createLinearGradient(0, y - size / 2, 0, y + size / 2);
+    g.addColorStop(0, "#ff5a4a"); g.addColorStop(0.55, RED); g.addColorStop(1, "#8e1710");
+    c.fillStyle = g; c.fillText("P", x, y);
+    c.restore();
+  }
+
+  // The giant trophy. stage 0 = ghost outline, 1 base, 2 columns + plaque, 3 cup, 4 P + words + star; won adds rays
+  function bigTrophy(c, stage, won) {
+    const gold = (y0, y1) => { const g = c.createLinearGradient(0, y0, 0, y1); g.addColorStop(0, "#fff2a8"); g.addColorStop(0.45, "#f2c14a"); g.addColorStop(1, "#a8780a"); return g; };
+    const goldH = (x0, x1) => { const g = c.createLinearGradient(x0, 0, x1, 0); g.addColorStop(0, "#a8780a"); g.addColorStop(0.35, "#fff2a8"); g.addColorStop(0.6, "#f2c14a"); g.addColorStop(1, "#8a6008"); return g; };
+    const cup = () => {
+      c.beginPath(); c.moveTo(TX - 135, 122);
+      c.bezierCurveTo(TX - 135, 260, TX - 90, 340, TX - 22, 360); c.lineTo(TX + 22, 360);
+      c.bezierCurveTo(TX + 90, 340, TX + 135, 260, TX + 135, 122); c.closePath();
+    };
+    if (won) {
+      c.save(); c.globalAlpha = 0.22;
+      for (let i = 0; i < 18; i++) {
+        const an = (i / 18) * TAU; c.fillStyle = i % 2 ? "#fff3c0" : "#ffd25a";
+        c.beginPath(); c.moveTo(TX, 260); c.arc(TX, 260, 420, an, an + TAU / 36); c.closePath(); c.fill();
+      }
+      c.restore();
+    }
+    // ghost of what's still to come
+    c.save(); c.setLineDash([6, 6]); c.strokeStyle = "rgba(255,243,192,.28)"; c.lineWidth = 2;
+    if (stage < 3) { cup(); c.stroke(); for (const d of [-1, 1]) { c.beginPath(); c.ellipse(TX + d * 150, 200, 22, 62, 0, 0, TAU); c.stroke(); } c.strokeRect(TX - 18, 360, 36, 44); }
+    if (stage < 2) { c.strokeRect(TX - 92, 404, 184, 144); }
+    if (stage < 1) { c.strokeRect(TX - 120, 548, 240, 52); }
+    c.restore();
+    if (stage >= 1) { // marble plinth, two steps
+      c.fillStyle = "#24242c"; c.fillRect(TX - 120, 572, 240, 28); c.fillRect(TX - 100, 548, 200, 26);
+      c.fillStyle = "rgba(255,255,255,.08)"; c.fillRect(TX - 120, 572, 240, 3); c.fillRect(TX - 100, 548, 200, 3);
+      c.fillStyle = gold(572, 600); c.fillRect(TX - 120, 596, 240, 4); c.fillRect(TX - 100, 570, 200, 3);
+      // seatbelt strapping it in
+      c.strokeStyle = "rgba(20,20,20,.85)"; c.lineWidth = 7; c.beginPath(); c.moveTo(TX - 96, 548); c.lineTo(TX + 124, 588); c.stroke();
+      c.fillStyle = "#9aa3ad"; c.fillRect(TX + 120, 578, 22, 16);
+    }
+    if (stage >= 2) { // columns, platform and the plaque
+      for (const k of [-78, -40, 40, 78]) {
+        c.fillStyle = goldH(TX + k - 8, TX + k + 8); c.fillRect(TX + k - 8, 420, 16, 128);
+      }
+      c.fillStyle = gold(404, 422); c.fillRect(TX - 92, 404, 184, 18);
+      c.fillStyle = "#8a6008"; c.fillRect(TX - 92, 420, 184, 3);
+      c.fillStyle = gold(444, 530); rr(c, TX - 86, 444, 172, 84, 8); c.fill();
+      c.strokeStyle = "#7a5408"; c.lineWidth = 3; rr(c, TX - 86, 444, 172, 84, 8); c.stroke();
+      c.strokeStyle = "rgba(122,84,8,.5)"; c.lineWidth = 1.5; rr(c, TX - 79, 451, 158, 70, 6); c.stroke();
+    }
+    if (stage >= 3) { // stem, knob, cup and handles
+      c.fillStyle = goldH(TX - 20, TX + 20); c.fillRect(TX - 20, 360, 40, 46);
+      c.fillStyle = gold(372, 392); c.beginPath(); c.ellipse(TX, 382, 34, 12, 0, 0, TAU); c.fill();
+      c.lineWidth = 16; c.strokeStyle = goldH(TX - 200, TX + 200);
+      for (const d of [-1, 1]) { c.beginPath(); c.ellipse(TX + d * 128, 200, 44, 62, 0, 0, TAU); c.stroke(); }
+      c.fillStyle = goldH(TX - 135, TX + 135); cup(); c.fill();
+      c.strokeStyle = "#7a5408"; c.lineWidth = 3; cup(); c.stroke();
+      c.fillStyle = "#fff6c8"; c.beginPath(); c.ellipse(TX, 122, 135, 16, 0, 0, TAU); c.fill();
+      c.strokeStyle = "#a8780a"; c.lineWidth = 3; c.stroke();
+      c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.moveTo(TX - 112, 140); c.quadraticCurveTo(TX - 108, 260, TX - 60, 330); c.lineTo(TX - 78, 330); c.quadraticCurveTo(TX - 124, 260, TX - 124, 140); c.closePath(); c.fill();
+    }
+    if (stage >= 4) { // the big P, the words, and a star on top
+      pisgahP(c, TX, 236, 150);
+      c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#3a2604";
+      c.font = 'italic 900 26px Georgia,"Times New Roman",serif'; c.fillText("Number 1", TX, 470);
+      c.font = 'italic 700 15px Georgia,"Times New Roman",serif'; c.fillText("in our hearts always", TX, 500);
+      c.fillStyle = gold(40, 110); c.strokeStyle = "#7a5408"; c.lineWidth = 2; c.beginPath();
+      for (let i = 0; i < 10; i++) { const an = -Math.PI / 2 + (i * Math.PI) / 5, r = i % 2 ? 16 : 38; c.lineTo(TX + Math.cos(an) * r, 70 + Math.sin(an) * r); }
+      c.closePath(); c.fill(); c.stroke();
+    }
+  }
+
+  function trophyReveal(S, stage) {
+    try { window.dispatchEvent(new Event("resize")); } catch (err) {} // re-renders the cached background
+    const [x, y] = STAGE_AT[Math.min(stage, 4) - 1];
+    S.sfx("chime"); S.ring(x, y, 140, "#fff3c0", 0.6); S.stars(x, y, 14); S.shake(4);
+    for (let i = 0; i < 24; i++)
+      S.P({ x: x + rnd(-110, 110), y: y + rnd(-40, 40), vx: rnd(-80, 80), vy: rnd(-200, -60), life: rnd(0.6, 1.2), max: 1,
+        size: rnd(3, 6), color: i % 3 ? "#ffd25a" : "#ffffff", type: "spark", g: 260 });
+    S.popup(x, y - 60, stage >= 4 ? "Number 1 ♥" : "♥", "#ffd0d6");
+  }
+
+  // the Blues: little rain clouds riding along — knock them out to cheer up the bus
+  function blues(big) {
+    return (c, o, { hit, hurt, blink, look }) => {
+      const puff = big ? "#7d8fb8" : "#8a9cc4", dark = "#4a5a84";
+      for (const [x, y, r] of [[-0.62, 0.15, 0.55], [0.62, 0.18, 0.52], [-0.3, -0.42, 0.55], [0.32, -0.48, 0.5], [0, 0.32, 0.6]])
+        circ(c, x * o, y * o, r * o, puff, dark, 1.5);
+      circ(c, 0, 0, 0.78 * o, puff);
+      c.fillStyle = "rgba(255,255,255,.25)"; c.beginPath(); c.arc(-0.3 * o, -0.55 * o, 0.28 * o, 0, TAU); c.fill();
+      rivalEyes(c, o, { hit, blink, look }, 0.28 * o, -0.05 * o, 0.16 * o, null, false);
+      if (!hit) { // sad brows + frown
+        line(c, [[-0.46 * o, -0.32 * o], [-0.16 * o, -0.42 * o]], dark, 2.2);
+        line(c, [[0.46 * o, -0.32 * o], [0.16 * o, -0.42 * o]], dark, 2.2);
+        c.strokeStyle = dark; c.lineWidth = 2; c.beginPath(); c.moveTo(-0.18 * o, 0.42 * o); c.quadraticCurveTo(0, 0.28 * o, 0.18 * o, 0.42 * o); c.stroke();
+        ell(c, 0.42 * o, 0.18 * o, 0.06 * o, 0.1 * o, 0, "#bfe4ff");
+      } else ell(c, 0, 0.38 * o, 0.12 * o, 0.14 * o, 0, "#2a3250");
+      if (hurt) hurtMarks(c, o);
+    };
+  }
+  const drizzle = (c, o, t, ent, { hit }) => {
+    if (hit) return;
+    c.fillStyle = "rgba(160,210,255,.85)";
+    for (let i = 0; i < 3; i++) {
+      const k = (t * 1.6 + i / 3 + (ent.blink || 0)) % 1, x = (i - 1) * 0.45 * o;
+      ell(c, x, 0.9 * o + k * 0.8 * o, 0.05 * o, 0.11 * o, 0, `rgba(160,210,255,${0.9 * (1 - k)})`);
+    }
+  };
+
   /* ---------- the theme ---------- */
   Slingshot.start({
     id: "knight-tournament",
@@ -592,13 +711,13 @@
       subtitle: "Drag a bear back to aim · release to launch · tap mid-air for that section’s move",
       hint: "Mouse / touch · R restart · M mute · S shuffle",
       win: "SECTION CLEARED!",
-      finalWin: "PISGAH BRINGS IT HOME!",
+      finalWin: "PROUD OF YOU, PISGAH!",
       lose: "BACK TO REHEARSAL…",
       noBonus: "No bandies to spare!",
       firstHint: "◀ Drag the bear back, then release!",
       outOfAmmo: "Out of bandies! Call the Drum Major ↗",
       bonus: (n, pts) => `Bonus: ${n} bandie${n > 1 ? "s" : ""} left × 10,000 = ${pts}`,
-      goal: (n) => `Outplay ${n} rival${n > 1 ? "s" : ""}!`,
+      goal: (n) => (SN && SN.level === BUS ? `Chase away ${n} case${n > 1 ? "s" : ""} of the blues!` : `Outplay ${n} rival${n > 1 ? "s" : ""}!`),
       nameLabel: "Bandie name",
       scoreLabel: "SCORE",
     },
@@ -703,12 +822,14 @@
       trojanKing: { r: 27, hp: 120, score: 10000, dmgMul: 1.1, debris: [CHASE_BLUE, CHASE_GOLD, RED], sprite: { pad: 2.5, body: trojan("king") } },
       rocketSmall: { r: 14, hp: 26, score: 5000, debris: [ACR_GREEN, ACR_GOLD, "#fff"], sprite: { pad: 2.2, body: rocket("small"), front: exhaust } },
       rocket: { r: 18, hp: 42, score: 5000, debris: [ACR_GREEN, ACR_GOLD, "#fff"], sprite: { pad: 2.3, body: rocket("normal"), front: exhaust } },
+      blues: { r: 16, hp: 34, score: 5000, debris: ["#8a9cc4", "#bfe4ff", "#fff"], sprite: { pad: 2.2, body: blues(false), front: drizzle } },
+      bigBlues: { r: 24, hp: 80, score: 10000, debris: ["#7d8fb8", "#bfe4ff", "#fff"], sprite: { pad: 2.2, body: blues(true), front: drizzle } },
       rocketKing: { r: 27, hp: 120, score: 10000, dmgMul: 1.1, debris: [ACR_GREEN, ACR_GOLD, "#fff"], sprite: { pad: 2.4, body: rocket("king"), front: exhaust } },
     },
     special: { type: "major", label: "DRUM MAJOR", icon: "🎼", uses: 1, perLevel: true, fromLevel: 1, dust: "rgba(255,236,170," },
     shuffle: { label: "SHUFFLE SECTIONS", icon: "🔀" },
     sling: { wood: "#7a1a14", woodFront: "#a3271d" },
-    sounds: ({ tone, noise }) => ({
+    sounds: (S) => { SN = S; const { tone, noise } = S; return {
       blast() {
         [233, 294, 349, 466].forEach((f, i) => { tone(f, 0.55, "sawtooth", 0.07, 0, 0.01 * i); tone(f * 2, 0.4, "square", 0.025, 0, 0.01 * i); });
         noise(0.15, 0.12, 1800, "bandpass");
@@ -722,7 +843,27 @@
         });
         tone(65, 0.9, "sine", 0.3, -20, 0.32); noise(0.5, 0.35, 300, "lowpass", 0.32);
       },
-    }),
+      chime() { [784, 988, 1175, 1568].forEach((f, i) => { tone(f, 0.9, "sine", 0.09, 0, 0.08 * i); tone(2 * f, 0.5, "sine", 0.025, 0, 0.08 * i); }); },
+    }; },
+    onStep(dt, S) {
+      if (S.level !== BUS) return;
+      for (const g of KT.groups) {
+        if (g.done || !g.items.length) continue;
+        let wrecked = 0;
+        for (const it of g.items) {
+          const b = it.e.body;
+          if (it.e.dead || Math.hypot(b.position.x - it.x, b.position.y - it.y) > 45 || Math.abs(b.angle - it.a) > 0.5) wrecked++;
+        }
+        if (wrecked >= Math.ceil(g.items.length * 0.6)) { g.done = true; KT.stage = Math.min(4, KT.stage + 1); trophyReveal(S, KT.stage); }
+      }
+      if (S.state === "won" && !KT.won) { KT.won = true; KT.stage = 4; trophyReveal(S, 4); }
+    },
+    onTargetDown(t, S) {
+      if (S.level !== BUS) return;
+      const p = t.body.position;
+      for (let i = 0; i < 6; i++)
+        S.P({ x: p.x, y: p.y, vx: rnd(-120, 120), vy: rnd(-220, -80), life: 1, max: 1, size: rnd(16, 24), color: i % 2 ? "#ff7a8a" : "#ffd25a", type: "text", text: i % 2 ? "♥" : "☀", g: 200 });
+    },
     backgrounds: [
       // 0 · WARM-UP LOT — afternoon, Blue Ridge behind, band trailer, asphalt
       {
@@ -873,6 +1014,66 @@
           c.fillStyle = sg; c.fillRect(0, 240, 460, 400);
         },
       },
+      // 5 · THE BUS RIDE HOME — inside a packed band bus at night, giant trophy strapped in the aisle
+      {
+        sky: ["#0a1030", "#1a2450"], clouds: false, stadium: true,
+        draw(c, r, { W, H, G }) {
+          // interior wall
+          c.fillStyle = "#3b3a36"; c.fillRect(0, 0, W, G);
+          // ceiling with warm dome lights
+          const cg = c.createLinearGradient(0, 0, 0, 96); cg.addColorStop(0, "#5a564c"); cg.addColorStop(1, "#47443c");
+          c.fillStyle = cg; c.fillRect(0, 0, W, 96);
+          c.fillStyle = "rgba(0,0,0,.18)"; for (let x = 0; x < W; x += 80) c.fillRect(x, 0, 2, 96);
+          for (const x of [120, 440, 760, 1080]) {
+            const lg = c.createRadialGradient(x, 40, 4, x, 40, 160); lg.addColorStop(0, "rgba(255,226,160,.35)"); lg.addColorStop(1, "rgba(255,226,160,0)");
+            c.fillStyle = lg; c.fillRect(x - 170, 0, 340, 220);
+            c.fillStyle = "#fff0c8"; rr(c, x - 28, 32, 56, 14, 6); c.fill();
+          }
+          // luggage rack with cases and a sousaphone bell
+          c.fillStyle = "#24231f"; c.fillRect(0, 100, W, 10);
+          for (let x = 30; x < W - 60; x += 110) { c.fillStyle = (x / 110) % 2 < 1 ? "#1a1a1a" : "#2a2424"; rr(c, x, 74, 86, 28, 5); c.fill(); c.fillStyle = "#9aa3ad"; c.fillRect(x + 38, 84, 10, 6); }
+          // night windows rolling past
+          for (let x = 20; x < W; x += 210) {
+            const wg = c.createLinearGradient(0, 124, 0, 300); wg.addColorStop(0, "#0b1430"); wg.addColorStop(1, "#1c2a55");
+            c.fillStyle = wg; rr(c, x, 124, 180, 172, 12); c.fill();
+            c.save(); rr(c, x, 124, 180, 172, 12); c.clip();
+            c.fillStyle = "#111a36"; c.beginPath(); c.moveTo(x, 270);
+            for (let k = 0; k <= 180; k += 15) c.lineTo(x + k, 250 - 22 * Math.abs(Math.sin((x + k) * 0.012)));
+            c.lineTo(x + 180, 300); c.lineTo(x, 300); c.fill();
+            for (let k = 0; k < 6; k++) { c.fillStyle = "rgba(255,255,255,.7)"; c.fillRect(x + r() * 180, 130 + r() * 90, 1.5, 1.5); }
+            c.strokeStyle = "rgba(255,190,90,.55)"; c.lineWidth = 3; c.lineCap = "round";
+            for (let k = 0; k < 3; k++) { const y = 262 + k * 10, x0 = x + r() * 100; c.beginPath(); c.moveTo(x0, y); c.lineTo(x0 + 50 + r() * 40, y); c.stroke(); }
+            c.lineCap = "butt"; c.restore();
+            c.strokeStyle = "#1a1916"; c.lineWidth = 6; rr(c, x, 124, 180, 172, 12); c.stroke();
+            c.fillStyle = "#1a1916"; c.fillRect(x, 206, 180, 5);
+          }
+          // seat backs, packed with bandies (dim silhouettes, kept clear of the slingshot)
+          const head = (x, y, k) => {
+            c.fillStyle = "#27304a"; c.beginPath(); c.arc(x, y, 15 * k, 0, TAU); c.fill();
+            c.beginPath(); c.arc(x - 9 * k, y - 12 * k, 6 * k, 0, TAU); c.arc(x + 9 * k, y - 12 * k, 6 * k, 0, TAU); c.fill();
+            if (r() < 0.5) { c.fillStyle = "#1c2236"; c.fillRect(x - 9 * k, y - 34 * k, 18 * k, 22 * k); c.fillStyle = "rgba(255,255,255,.4)"; c.fillRect(x - 2 * k, y - 44 * k, 4 * k, 10 * k); }
+          };
+          for (let x = 0; x < W; x += 150) {
+            if (x > 90 && x < 300) continue;
+            head(x + 40, 455, 1); head(x + 95, 460, 0.95);
+          }
+          for (let x = -20; x < W; x += 150) {
+            if (x > 60 && x < 300) continue;
+            const sg = c.createLinearGradient(0, 470, 0, 640); sg.addColorStop(0, "#2a5a4e"); sg.addColorStop(1, "#173a32");
+            c.fillStyle = sg; rr(c, x, 470, 140, 180, 22); c.fill();
+            c.fillStyle = "rgba(255,255,255,.08)"; rr(c, x + 8, 478, 124, 10, 5); c.fill();
+            c.strokeStyle = "rgba(0,0,0,.35)"; c.lineWidth = 2; for (let y = 520; y < 640; y += 34) { c.beginPath(); c.moveTo(x + 10, y); c.lineTo(x + 130, y); c.stroke(); }
+          }
+          // instrument cases stacked in the aisle by the slingshot
+          c.fillStyle = "#121212"; rr(c, 110, 588, 70, 52, 6); c.fill(); rr(c, 250, 600, 44, 40, 6); c.fill();
+          c.fillStyle = "#9aa3ad"; c.fillRect(140, 600, 10, 5); c.fillRect(266, 610, 8, 5);
+          bigTrophy(c, KT.stage, KT.won);
+          // ribbed rubber floor
+          c.fillStyle = "#1b1b1d"; c.fillRect(0, G, W, H - G);
+          c.fillStyle = "#c9a227"; c.fillRect(0, G, W, 4);
+          c.fillStyle = "rgba(255,255,255,.06)"; for (let y = G + 10; y < H; y += 8) c.fillRect(0, y, W, 2);
+        },
+      },
     ],
     levels: [
       {
@@ -963,6 +1164,37 @@
           e.blk("wood", 1155, 560, 100, 16);
           e.pig("trojan", 1155, G); e.tnt(1155, 544);
           e.blk("wood", 700, G, 16, 60); e.blk("wood", 740, G, 16, 60);
+        },
+      },
+      {
+        name: "Bus Ride Home", bg: 5,
+        birds: ["brass", "woodwind", "drumline", "front", "guard", "brass", "drumline"],
+        label: "THE BUS RIDE HOME",
+        build(e) {
+          const G = 640;
+          KT.stage = 0; KT.won = false; KT.groups = [];
+          const grp = (fn) => {
+            const n0 = SN ? SN.ents.length : 0; fn();
+            const items = SN ? SN.ents.slice(n0).filter((x) => x.kind !== "pig").map((x) => ({ e: x, x: x.body.position.x, y: x.body.position.y, a: x.body.angle })) : [];
+            KT.groups.push({ items, done: false });
+          };
+          grp(() => {
+            e.blk("wood", 720, G, 18, 90); e.blk("wood", 800, G, 18, 90); e.blk("wood", 760, 550, 120, 16);
+            e.pig("blues", 760, G); e.pig("blues", 760, 534);
+          });
+          grp(() => {
+            e.blk("stone", 850, G, 22, 100); e.blk("stone", 950, G, 22, 100); e.blk("wood", 900, 540, 140, 16);
+            e.blk("glass", 868, 524, 14, 70); e.blk("glass", 932, 524, 14, 70); e.blk("wood", 900, 454, 100, 14);
+            e.pig("blues", 900, G); e.pig("blues", 900, 524);
+          });
+          grp(() => {
+            e.blk("wood", 1010, G, 16, 120); e.blk("wood", 1080, G, 16, 120); e.blk("stone", 1045, 520, 110, 16);
+            e.tnt(1045, G); e.pig("blues", 1045, 504);
+          });
+          grp(() => {
+            e.blk("stone", 1150, G, 20, 80); e.blk("stone", 1230, G, 20, 80); e.blk("wood", 1190, 560, 110, 16);
+            e.pig("bigBlues", 1190, 544); e.pig("blues", 1190, G);
+          });
         },
       },
     ],

@@ -123,6 +123,7 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
 </script>
 <script>
 /* Knight Tournament — Pisgah Band slingshot variant (theme for the Slingshot engine 2.1.0)
+ * 15 levels in five acts of three (one act per background); originals sit at 1, 4, 7, 10, 13.
  * 17th Annual Knight Tournament · North Henderson HS · Oct 24, 2026 · 5A class
  * Players: Pisgah Black Bears band sections. Rivals: Chase Trojans and A.C. Reynolds Rockets.
  * Readable source; build.sh inlines this into index.html. */
@@ -706,6 +707,15 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
     }
   }
 
+  /* ---------- level-building helpers ---------- */
+  const G = 640; // ground line
+  // two posts + a beam across them; returns the beam's top so the next story can sit on it
+  function frame(e, x, y, span, h, o = {}) {
+    const pw = o.pw || 18, post = o.post || "wood", beam = o.beam || "wood", bt = o.bt || 16;
+    e.blk(post, x - span / 2, y, pw, h); e.blk(post, x + span / 2, y, pw, h);
+    return e.blk(beam, x, y - h, span + pw + (o.over ?? 20), bt);
+  }
+
   /* ---------- the theme ---------- */
   Slingshot.start({
     id: "knight-tournament",
@@ -740,6 +750,12 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
       --shuffle:linear-gradient(180deg,#4a4a52,#222228);--shuffle-edge:#0a0a0e}
     h1 b{font-size:.78em;letter-spacing:.06em}
     h1::after{content:'17TH ANNUAL KNIGHT TOURNAMENT · NORTH HENDERSON · 10.24.26 · 5A';display:block;font-size:calc(14*var(--u));font-weight:700;letter-spacing:.28em;color:#e9e4d8;margin-top:calc(14*var(--u))}
+    #levels{display:grid;grid-template-columns:repeat(5,calc(124*var(--u)));gap:calc(8*var(--u));justify-content:center;margin-bottom:calc(16*var(--u))}
+    .lvl{width:auto;padding:calc(6*var(--u)) calc(4*var(--u));border-radius:calc(12*var(--u))}
+    .lvl b{font-size:calc(24*var(--u))}
+    .lvl i{font-size:calc(10.5*var(--u));min-height:calc(14*var(--u));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .lvl .st{font-size:calc(13*var(--u))}
+    .lvl:disabled{background:rgba(8,8,14,.82);opacity:.55}
     .special{color:#2a1a02}
     .stadium .pill{background:#070707;border:2px solid #555;color:#ffb62e;font-family:"Courier New",monospace;text-shadow:0 0 8px #ff9a00;border-radius:calc(6*var(--u));backdrop-filter:none}
     .stadium .ib{background:#111;border-color:#555;color:#ffb62e}`,
@@ -1000,7 +1016,7 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
     ],
     levels: [
       {
-        name: "Warm-Up Lot", bg: 0,
+        name: "Warm-Up Lot", bg: 0,  // 1 · ACT I
         birds: ["brass", "brass", "woodwind", "drumline"],
         build(e) {
           e.blk("wood", 840, 640, 18, 90); e.blk("wood", 960, 640, 18, 90);
@@ -1012,8 +1028,36 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
         },
       },
       {
+        name: "Tuning Up", bg: 0,
+        birds: ["brass", "woodwind", "drumline", "brass"],
+        build(e) {
+          // glass practice hut + a two-story wood rack
+          const h = frame(e, 830, G, 90, 70, { post: "glass", pw: 14 });
+          e.pig("trojanCadet", 830, G);
+          const t1 = frame(e, 1020, G, 100, 90);
+          e.pig("trojan", 1020, G);
+          e.pig("rocketSmall", 1020, t1);
+          e.blk("glass", 1150, G, 16, 60);
+        },
+      },
+      {
+        name: "Equipment Check", bg: 0,
+        birds: ["brass", "drumline", "woodwind", "guard", "brass"],
+        build(e) {
+          // stacked equipment rack: two rivals on the floor, one upstairs, one on the roof
+          const t1 = frame(e, 880, G, 140, 90);
+          e.pig("trojan", 850, G); e.pig("rocketSmall", 912, G);
+          const t2 = frame(e, 880, t1, 90, 70);
+          e.pig("trojanCadet", 880, t1);
+          e.pig("rocket", 880, t2);
+          e.tnt(1030, G);
+          frame(e, 1140, G, 90, 80, { post: "glass", pw: 14 });
+          e.pig("trojanShield", 1140, G);
+        },
+      },
+      {
         name: "The Gate", bg: 1,
-        birds: ["brass", "drumline", "woodwind", "guard"],
+        birds: ["brass", "drumline", "woodwind", "guard", "brass"],
         build(e) {
           const G = 640;
           e.blk("stone", 850, G, 22, 90); e.blk("stone", 950, G, 22, 90);
@@ -1025,6 +1069,36 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
           e.blk("glass", 1090, G, 16, 80); e.blk("glass", 1170, G, 16, 80);
           e.blk("stone", 1130, 560, 120, 16);
           e.pig("trojanCadet", 1130, G); e.pig("trojanShield", 1130, 544);
+        },
+      },
+      {
+        name: "Ticket Line", bg: 1,
+        birds: ["brass", "woodwind", "front", "drumline", "guard"],
+        build(e) {
+          // four glass ticket booths in a row — a long, low target
+          const b1 = frame(e, 800, G, 66, 80, { post: "glass", pw: 14 }); e.pig("rocketSmall", 800, G);
+          const b2 = frame(e, 935, G, 66, 80, { post: "glass", pw: 14 }); e.pig("trojan", 935, G);
+          const b3 = frame(e, 1070, G, 66, 80, { post: "glass", pw: 14 }); e.pig("rocket", 1070, G);
+          frame(e, 1205, G, 66, 80, { post: "glass", pw: 14 }); e.pig("trojanCadet", 1205, G);
+          e.tnt(935, b2);
+          e.pig("rocketSmall", 1070, b3);
+          e.blk("wood", 800, b1, 40, 30);
+        },
+      },
+      {
+        name: "Concessions", bg: 1,
+        birds: ["brass", "drumline", "front", "woodwind", "guard"],
+        build(e) {
+          // stone concession bunker with an amp inside, wood stand on the roof
+          e.blk("wood", 720, G, 16, 60); e.pig("trojanCadet", 765, G);
+          const t1 = frame(e, 930, G, 140, 100, { post: "stone", pw: 24, beam: "stone", bt: 18 });
+          e.tnt(895, G); e.pig("trojanShield", 960, G);
+          const t2 = frame(e, 930, t1, 100, 70);
+          e.pig("trojan", 930, t1);
+          e.pig("rocketSmall", 930, t2);
+          const g1 = e.blk("glass", 1150, G, 60, 40);
+          const g2 = e.blk("glass", 1150, g1, 44, 40);
+          e.pig("rocket", 1150, g2);
         },
       },
       {
@@ -1046,9 +1120,43 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
         },
       },
       {
+        name: "Pit Crew", bg: 2,
+        birds: ["brass", "drumline", "woodwind", "front", "guard"],
+        build(e) {
+          // three-story pit tower: stone base, wood middle, glass lookout
+          const s1 = frame(e, 960, G, 150, 90, { post: "stone", pw: 22 });
+          e.pig("trojan", 928, G); e.pig("rocket", 992, G);
+          const s2 = frame(e, 960, s1, 110, 80);
+          e.pig("trojanShield", 960, s1);
+          const s3 = frame(e, 960, s2, 70, 60, { post: "glass", pw: 14 });
+          e.pig("rocketSmall", 960, s2);
+          e.pig("trojanCadet", 960, s3);
+          e.tnt(1110, G);
+          const c = e.blk("wood", 1180, G, 44, 44);
+          e.pig("rocketSmall", 1180, c);
+        },
+      },
+      {
+        name: "Visitor Stands", bg: 2,
+        birds: ["brass", "woodwind", "drumline", "front", "guard", "brass"],
+        build(e) {
+          // stone bleacher steps climbing away from the sling, a rival on every row
+          const r1 = e.blk("stone", 800, G, 80, 40);
+          const r2 = e.blk("stone", 880, G, 80, 80);
+          const r3 = e.blk("stone", 960, G, 80, 120);
+          const r4 = e.blk("stone", 1040, G, 80, 160);
+          e.pig("trojanCadet", 805, r1);
+          e.blk("glass", 852, r2, 12, 46); e.pig("trojan", 890, r2);
+          e.blk("glass", 932, r3, 12, 46); e.pig("trojanShield", 970, r3);
+          const c = frame(e, 1040, r4, 50, 56, { pw: 14, over: 14 });
+          e.pig("trojan", 1040, r4); e.pig("rocketSmall", 1040, c);
+          e.tnt(1140, G);
+          frame(e, 1210, G, 60, 70, { post: "glass", pw: 14 }); e.pig("rocket", 1210, G);
+        },
+      },
+      {
         name: "Under the Lights", bg: 3,
         birds: ["brass", "drumline", "drumline", "woodwind", "front", "guard"],
-        label: "NORTH HENDERSON · UNDER THE LIGHTS",
         hudClass: "stadium", scoreLabel: "PISGAH · 5A",
         build(e) {
           const G = 640;
@@ -1066,9 +1174,45 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
         },
       },
       {
+        name: "Press Box", bg: 3,
+        hudClass: "stadium", scoreLabel: "PISGAH · 5A",
+        birds: ["brass", "drumline", "woodwind", "front", "guard"],
+        build(e) {
+          // press box up on tall stone pillars — the Trojan king watches from inside
+          const t1 = frame(e, 970, G, 180, 150, { post: "stone", pw: 24, beam: "stone", bt: 18 });
+          e.tnt(935, G); e.pig("trojanShield", 1005, G);
+          const t2 = frame(e, 970, t1, 140, 72, { post: "glass", pw: 14 });
+          e.pig("trojanCadet", 922, t1); e.pig("trojanKing", 990, t1);
+          e.pig("rocketSmall", 970, t2);
+          e.blk("wood", 1150, G, 16, 90);
+          e.pig("rocket", 1200, G);
+        },
+      },
+      {
+        name: "Judges' Tower", bg: 3,
+        hudClass: "stadium", scoreLabel: "PISGAH · 5A",
+        birds: ["brass", "drumline", "woodwind", "front", "guard", "brass"],
+        build(e) {
+          // a wood scaffold up front and a tall stone judges' tower behind it
+          const a1 = frame(e, 800, G, 80, 100);
+          e.pig("trojan", 800, G);
+          const a2 = frame(e, 800, a1, 80, 80);
+          e.pig("rocket", 800, a1);
+          e.pig("trojanCadet", 800, a2);
+          const s1 = frame(e, 1010, G, 100, 100, { post: "stone", pw: 22 });
+          e.pig("trojanShield", 1010, G);
+          const s2 = frame(e, 1010, s1, 100, 100, { post: "stone", pw: 22 });
+          e.pig("trojan", 1010, s1);
+          const s3 = frame(e, 1010, s2, 72, 70, { post: "glass", pw: 14 });
+          e.pig("rocketKing", 1010, s2);
+          e.tnt(1010, s3);
+          e.blk("stone", 1150, G, 22, 80);
+          e.pig("rocketSmall", 1195, G);
+        },
+      },
+      {
         name: "Retreat & Awards", bg: 4,
         birds: ["brass", "drumline", "woodwind", "front", "guard", "brass"],
-        label: "KNIGHT TOURNAMENT · 5A FINALS",
         hudClass: "stadium", scoreLabel: "PISGAH · 5A",
         bannerExtra: "17TH ANNUAL KNIGHT TOURNAMENT",
         build(e) {
@@ -1087,6 +1231,51 @@ var NameFilter=function(){"use strict";var e,n=function(e){return e.replace(/[a-
           e.blk("wood", 1155, 560, 100, 16);
           e.pig("trojan", 1155, G); e.tnt(1155, 544);
           e.blk("wood", 700, G, 16, 60); e.blk("wood", 740, G, 16, 60);
+        },
+      },
+      {
+        name: "Caption Awards", bg: 4,
+        hudClass: "stadium", scoreLabel: "PISGAH · 5A",
+        bannerExtra: "17TH ANNUAL KNIGHT TOURNAMENT",
+        birds: ["brass", "drumline", "woodwind", "front", "guard", "drumline"],
+        build(e) {
+          // two stone forts, one for each rival school's king
+          const l1 = frame(e, 790, G, 110, 100, { post: "stone", pw: 24, beam: "stone", bt: 18 });
+          e.pig("trojanKing", 790, G);
+          const l2 = frame(e, 790, l1, 80, 70);
+          e.pig("trojanShield", 790, l1);
+          e.pig("trojanCadet", 790, l2);
+          const m = e.blk("wood", 935, G, 30, 70);
+          e.pig("rocketSmall", 935, m);
+          const r1 = frame(e, 1090, G, 150, 100, { post: "stone", pw: 24, beam: "stone", bt: 18 });
+          e.pig("rocketKing", 1060, G); e.tnt(1125, G);
+          const r2 = frame(e, 1090, r1, 110, 70, { post: "glass", pw: 14 });
+          e.pig("rocket", 1068, r1); e.pig("rocketSmall", 1118, r1);
+          e.pig("trojan", 1090, r2);
+        },
+      },
+      {
+        name: "Grand Champion", bg: 4,
+        hudClass: "stadium", scoreLabel: "PISGAH · 5A",
+        bannerExtra: "17TH ANNUAL KNIGHT TOURNAMENT",
+        birds: ["brass", "drumline", "woodwind", "front", "guard", "brass", "drumline"],
+        build(e) {
+          // the championship keep: three stories, both kings, an outer wall and a watchtower
+          e.blk("stone", 755, G, 26, 120);
+          e.pig("trojanShield", 800, G);
+          const k1 = frame(e, 960, G, 180, 120, { post: "stone", pw: 26, beam: "stone", bt: 20 });
+          e.pig("trojanKing", 925, G); e.tnt(1003, G);
+          const k2 = frame(e, 960, k1, 130, 90, { post: "stone", pw: 22 });
+          e.pig("rocketKing", 960, k1);
+          const k3 = frame(e, 960, k2, 70, 60, { post: "glass", pw: 14 });
+          e.pig("trojan", 960, k2);
+          e.pig("rocketSmall", 960, k3);
+          e.blk("glass", 1095, G, 14, 70); e.pig("rocketSmall", 1122, G);
+          const w1 = frame(e, 1205, G, 66, 100);
+          e.pig("rocket", 1205, G);
+          const w2 = frame(e, 1205, w1, 66, 70, { post: "glass", pw: 14 });
+          e.pig("trojanCadet", 1205, w1);
+          e.tnt(1205, w2);
         },
       },
     ],

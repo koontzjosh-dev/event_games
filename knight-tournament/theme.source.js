@@ -190,8 +190,7 @@
     c.beginPath(); c.arc(0, 0.05 * a, 0.82 * a, Math.PI * 1.04, Math.PI * 1.96); c.closePath(); c.fill(); c.stroke();
     c.fillStyle = RED; c.beginPath(); c.moveTo(0.5 * a, -0.02 * a);
     c.quadraticCurveTo(1.0 * a, -0.08 * a, 1.25 * a, 0.08 * a); c.lineTo(0.55 * a, 0.12 * a); c.closePath(); c.fill(); c.stroke();
-    c.fillStyle = "#fff"; c.font = `900 ${Math.round(0.42 * a)}px "Trebuchet MS",sans-serif`;
-    c.textAlign = "center"; c.textBaseline = "middle"; c.fillText("P", -0.05 * a, -0.38 * a);
+    pisgahP(c, -0.02 * a, -0.4 * a, 0.36 * a);
     c.restore();
     // marimba bars under the chin
     const bars = ["#7a3a1c", "#8a4422", "#9a4e28", "#7a3a1c", "#8a4422"];
@@ -590,14 +589,28 @@
   // where each trophy stage appears (for the reveal burst)
   const STAGE_AT = [[TX, 575], [TX, 470], [TX, 250], [TX, 230]];
 
-  function pisgahP(c, x, y, size) {
-    c.save(); c.font = `900 ${size}px "Arial Black","Trebuchet MS",sans-serif`; c.textAlign = "center"; c.textBaseline = "middle";
-    c.lineJoin = "round";
-    c.lineWidth = size * 0.16; c.strokeStyle = "#111"; c.strokeText("P", x, y);
-    c.lineWidth = size * 0.07; c.strokeStyle = "#fff"; c.strokeText("P", x, y);
-    const g = c.createLinearGradient(0, y - size / 2, 0, y + size / 2);
-    g.addColorStop(0, "#ff5a4a"); g.addColorStop(0.55, RED); g.addColorStop(1, "#8e1710");
-    c.fillStyle = g; c.fillText("P", x, y);
+  // Pisgah's athletic "P": italic block letter, red fill, black outline, white outer outline.
+  // x,y = center, size = letter height
+  function pisgahP(c, x, y, size, outline = true) {
+    const P = new Path2D();
+    // outer shape (unit box: 1.22 wide, 1 tall, drawn upright then slanted)
+    P.moveTo(-0.08, 0); P.lineTo(0.98, 0);
+    P.quadraticCurveTo(1.22, 0, 1.22, 0.2); P.lineTo(1.22, 0.42);
+    P.quadraticCurveTo(1.22, 0.62, 0.98, 0.62); P.lineTo(0.48, 0.62);
+    P.lineTo(0.48, 1); P.lineTo(0, 1); P.lineTo(0, 0.17); P.lineTo(-0.08, 0.17); P.closePath();
+    // counter (the slot in the bowl)
+    P.moveTo(0.48, 0.17); P.lineTo(0.84, 0.17); P.quadraticCurveTo(0.9, 0.17, 0.9, 0.23);
+    P.lineTo(0.9, 0.39); P.quadraticCurveTo(0.9, 0.45, 0.84, 0.45); P.lineTo(0.48, 0.45); P.closePath();
+    c.save();
+    c.translate(x, y); c.scale(size, size);
+    c.transform(1, 0, -0.32, 1, 0, 0); // italic slant
+    c.translate(-0.5, -0.5);
+    c.lineJoin = "miter"; c.miterLimit = 3;
+    if (outline) {
+      c.strokeStyle = "#ffffff"; c.lineWidth = 0.22; c.stroke(P);
+      c.strokeStyle = "#111111"; c.lineWidth = 0.12; c.stroke(P);
+    } else { c.strokeStyle = "#111111"; c.lineWidth = 0.08; c.stroke(P); }
+    c.fillStyle = "#ee1c25"; c.fill(P, "evenodd");
     c.restore();
   }
 
@@ -654,7 +667,7 @@
       c.fillStyle = "rgba(255,255,255,.35)"; c.beginPath(); c.moveTo(TX - 112, 140); c.quadraticCurveTo(TX - 108, 260, TX - 60, 330); c.lineTo(TX - 78, 330); c.quadraticCurveTo(TX - 124, 260, TX - 124, 140); c.closePath(); c.fill();
     }
     if (stage >= 4) { // the big P, the words, and a star on top
-      pisgahP(c, TX, 236, 150);
+      pisgahP(c, TX + 8, 238, 118);
       c.textAlign = "center"; c.textBaseline = "middle"; c.fillStyle = "#3a2604";
       c.font = 'italic 900 26px Georgia,"Times New Roman",serif'; c.fillText("Number 1", TX, 470);
       c.font = 'italic 700 15px Georgia,"Times New Roman",serif'; c.fillText("in our hearts always", TX, 500);

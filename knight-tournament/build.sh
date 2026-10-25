@@ -11,6 +11,7 @@ SRC=../pisgah-vs-tuscola/index.html
   echo '<script>'
   cat theme.source.js
   echo '</script>'
+  cat leaderboard-link.html
   echo '</body>'
   echo '</html>'
 } > index.html

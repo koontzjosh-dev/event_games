@@ -40,6 +40,11 @@
   .track .tt { font-size: 13px; color: var(--gold); }
   .track:hover { border-color: #6b8a6e; }
   .track.on { border-color: var(--gold); background: #33472f; box-shadow: 0 0 0 2px rgba(232,176,74,0.35); }
+  #speeds { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .spd-l { color: var(--dim); font-size: 15px; margin-right: 4px; }
+  .spd { background: var(--card); border: 3px solid var(--line); padding: 8px 18px; min-height: 44px; font-weight: 900; font-size: 16px; }
+  .spd:hover { border-color: #6b8a6e; }
+  .spd.on { border-color: var(--gold); background: var(--gold); color: #1d2a1f; }
   .racer { background: var(--card); border: 3px solid var(--line); padding: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 4px; text-align: left; transition: transform .08s; }
   .racer:hover, .racer:focus-visible { border-color: var(--gold); outline: none; transform: translateY(-3px); }
   .racer img { width: 100%; aspect-ratio: 1; max-height: 30vh; object-fit: contain; image-rendering: pixelated; background: #263627; }
@@ -152,6 +157,7 @@
     <h1 class="px">CRITTER KART</h1>
     <p class="sub">Pick a track, then pick your critter · 3 laps</p>
     <div id="tracks"></div>
+    <div id="speeds" role="group" aria-label="Speed"></div>
     <div id="racers"></div>
     <p id="controls"></p>
     <p id="best"></p>

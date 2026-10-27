@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1d2a1f">
-<title>Critter Kart · Blocky Ridge</title>
+<title>Critter Kart</title>
 <style>
   :root { --bg: #1d2a1f; --card: #263627; --line: #3d5440; --text: #f1ead8; --dim: #c9c2ae; --gold: #e8b04a; --red: #c94b3a; }
   * { box-sizing: border-box; }
@@ -21,8 +21,9 @@
   .px { font-family: "Courier New", monospace; font-weight: 900; letter-spacing: 0.02em; }
   button { font: inherit; color: inherit; cursor: pointer; }
 
-  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 50; font-size: 22px; }
+  #loading { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: var(--bg); z-index: 50; font-size: 22px; }
 
+  #loading.on { display: flex; }
   /* overlays */
   .screen { position: fixed; inset: 0; display: none; z-index: 10; overflow-y: auto; touch-action: pan-y;
     background: linear-gradient(rgba(29,42,31,0.55), rgba(29,42,31,0.88)); padding: max(16px, env(safe-area-inset-top)) 16px 24px; }
@@ -31,6 +32,14 @@
   h1 { margin: 6px 0 0; font-size: clamp(34px, 7vw, 64px); line-height: 1; color: var(--gold); text-shadow: 4px 4px 0 #000; }
   .sub { margin: 0; color: var(--dim); font-size: 17px; }
   #racers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%; }
+  #tracks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; }
+  .track { background: var(--card); border: 3px solid var(--line); padding: 8px; display: grid; grid-template-columns: 76px 1fr; grid-template-rows: auto 1fr auto; column-gap: 10px; text-align: left; align-items: start; }
+  .track img { grid-row: 1 / 4; width: 76px; height: 76px; image-rendering: pixelated; }
+  .track .tn { font-size: 18px; font-weight: 900; }
+  .track .tb { font-size: 13px; color: var(--dim); line-height: 1.3; }
+  .track .tt { font-size: 13px; color: var(--gold); }
+  .track:hover { border-color: #6b8a6e; }
+  .track.on { border-color: var(--gold); background: #33472f; box-shadow: 0 0 0 2px rgba(232,176,74,0.35); }
   .racer { background: var(--card); border: 3px solid var(--line); padding: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 4px; text-align: left; transition: transform .08s; }
   .racer:hover, .racer:focus-visible { border-color: var(--gold); outline: none; transform: translateY(-3px); }
   .racer img { width: 100%; aspect-ratio: 1; max-height: 30vh; object-fit: contain; image-rendering: pixelated; background: #263627; }
@@ -46,6 +55,10 @@
     #racers { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
     .racer { padding: 6px; } .rn { font-size: 16px; } .rk, .rb { display: none; } .stats { font-size: 10px; }
     h1 { font-size: 34px; } .sub { font-size: 14px; }
+  }
+  @media (max-width: 760px), (max-height: 520px) {
+    .track { grid-template-columns: 48px 1fr; padding: 6px; } .track img { width: 48px; height: 48px; }
+    .track .tn { font-size: 14px; } .track .tb { display: none; }
   }
   @media (max-width: 520px) { #racers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
@@ -127,12 +140,13 @@
 </head>
 <body>
 <canvas id="game"></canvas>
-<div id="loading" class="px">Building Blocky Ridge…</div>
+<div id="loading" class="px on">Building the track…</div>
 
 <section id="menu" class="screen" aria-label="Choose a racer">
   <div class="wrap">
     <h1 class="px">CRITTER KART</h1>
-    <p class="sub">Blocky Ridge · 3 laps · pick your critter</p>
+    <p class="sub">Pick a track, then pick your critter · 3 laps</p>
+    <div id="tracks"></div>
     <div id="racers"></div>
     <p id="controls"></p>
     <p id="best"></p>

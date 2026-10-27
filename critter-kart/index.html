@@ -67,9 +67,14 @@
   #msg.big { font-size: clamp(56px, 12vw, 110px); color: var(--gold); }
   #wrong { position: fixed; left: 50%; top: 52%; transform: translateX(-50%); display: none; background: var(--red); padding: 8px 18px; font-size: 26px; z-index: 6; border: 3px solid #141e15; }
   #wrong.on { display: block; }
-  #mute { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: auto; background: rgba(29,42,31,0.82); border: 3px solid #141e15; width: 44px; height: 44px; padding: 0; display: none; align-items: center; justify-content: center; }
+  #mute, #fs { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; z-index: 20; pointer-events: auto; background: rgba(29,42,31,0.82); border: 3px solid #141e15; width: 44px; height: 44px; padding: 0; display: none; align-items: center; justify-content: center; }
+  #mute { transform: translateX(-50%); }
+  body.can-fs #mute { transform: translateX(calc(-100% - 4px)); }
+  #fs { transform: translateX(4px); }
   body.racing #mute, #menu.on ~ #mute { display: flex; }
-  #mute svg { width: 24px; height: 24px; } #mute.off .wave { display: none; } #mute:not(.off) .x { display: none; }
+  body.can-fs.racing #fs, body.can-fs #menu.on ~ #fs { display: flex; }
+  #mute svg, #fs svg { width: 24px; height: 24px; }
+  #fs.on .enter { display: none; } #fs:not(.on) .exit { display: none; } #mute.off .wave { display: none; } #mute:not(.off) .x { display: none; }
 
   /* touch controls */
   .tc { display: none; position: fixed; z-index: 7; pointer-events: auto; background: rgba(29,42,31,0.55); border: 3px solid rgba(241,234,216,0.55); color: var(--text);
@@ -157,6 +162,13 @@
 <button id="mute" aria-label="Sound on or off">
   <svg viewBox="0 0 24 24" fill="none" stroke="#f1ead8" stroke-width="2.4" aria-hidden="true">
     <path d="M4 9h4l5-4v14l-5-4H4z" fill="#f1ead8"/><path class="wave" d="M16 8c2 2 2 6 0 8M19 5c4 4 4 10 0 14"/><path class="x" d="M16 9l6 6M22 9l-6 6"/>
+  </svg>
+</button>
+
+<button id="fs" aria-label="Full screen on or off">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#f1ead8" stroke-width="2.6" stroke-linecap="square" aria-hidden="true">
+    <path class="enter" d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/>
+    <path class="exit" d="M9 4v5H4M20 9h-5V4M15 20v-5h5M4 15h5v5"/>
   </svg>
 </button>
 

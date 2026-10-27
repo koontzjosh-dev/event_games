@@ -3,7 +3,7 @@
  * and the cached copy is used when the event's connection drops.
  * Bump VERSION when you add or rename files so old caches are cleared.
  */
-const VERSION = 'critterkart-v9';
+const VERSION = 'critterkart-v10';
 const FILES = ['./', 'index.html', 'game.js'];
 
 self.addEventListener('install', (e) => {

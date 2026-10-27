@@ -57,9 +57,15 @@
   #lap { font-size: 22px; } #time { font-size: 16px; color: var(--gold); }
   #pos { position: absolute; top: max(4px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); font-size: 56px; color: #fff; text-shadow: 4px 4px 0 #141e15, -2px -2px 0 #141e15, 2px -2px 0 #141e15, -2px 2px 0 #141e15; }
   #item { bottom: 16px; left: max(12px, env(safe-area-inset-left)); width: 70px; height: 70px; padding: 0; display: flex; align-items: center; justify-content: center; opacity: 0.45; }
-  #item.has { opacity: 1; border-color: var(--gold); }
+  #item { opacity: 0.5; border-style: dashed; }
+  #item svg { filter: grayscale(1) brightness(0.7); }
+  #item.has { opacity: 1; border-style: solid; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(232,176,74,0.35), 0 0 18px rgba(232,176,74,0.65); }
+  #item.has svg { filter: none; }
+  #item.pop { animation: pop .45s ease-out; }
+  @keyframes pop { 0% { transform: scale(1); } 35% { transform: scale(1.45) rotate(-8deg); } 70% { transform: scale(0.92) rotate(4deg); } 100% { transform: scale(1); } }
   #item svg { width: 44px; height: 44px; }
-  #item-n { position: absolute; right: 4px; bottom: 0; font-size: 16px; color: var(--gold); }
+  #item-n { position: absolute; right: -10px; top: -12px; font-size: 18px; color: #1d2a1f; background: var(--gold); border: 2px solid #141e15; padding: 0 4px; }
+  #item-n:empty { display: none; }
   #mini { position: absolute; right: max(12px, env(safe-area-inset-right)); bottom: 14px; width: 150px; height: 150px; background: rgba(29,42,31,0.7); border: 3px solid #141e15; image-rendering: pixelated; }
   #msg { position: fixed; left: 50%; top: 32%; transform: translate(-50%, -50%) scale(0.6); opacity: 0; transition: opacity .15s, transform .15s; z-index: 6; pointer-events: none;
     font-size: 40px; color: #fff; text-shadow: 4px 4px 0 #141e15; white-space: nowrap; }
@@ -84,13 +90,17 @@
   #t-left, #t-right { bottom: 100px; width: 92px; height: 92px; }
   #t-left { left: max(14px, env(safe-area-inset-left)); } #t-right { left: calc(max(14px, env(safe-area-inset-left)) + 104px); }
   #t-brake, #t-item { right: calc(max(14px, env(safe-area-inset-right)) + 170px); width: 92px; height: 70px; }
-  #t-brake { bottom: 16px; } #t-item { bottom: 96px; }
+  #t-brake { bottom: 16px; } #t-item { bottom: 96px; opacity: 0.45; }
+  #t-item.ready { opacity: 1; background: rgba(232,176,74,0.85); color: #1d2a1f; border-color: #fff4d0; animation: ready 0.9s ease-in-out infinite; }
+  @keyframes ready { 50% { box-shadow: 0 0 0 6px rgba(232,176,74,0.45); } }
   #t-left svg, #t-right svg { width: 40px; height: 40px; }
   body.touch #item { bottom: 16px; }
   body.touch #mini { width: 120px; height: 120px; }
 
   /* results & pause */
-  .panel { background: var(--card); border: 3px solid var(--line); padding: 18px 22px; width: min(520px, 100%); margin-top: 8vh; }
+  .panel { background: var(--card); border: 3px solid var(--line); padding: 18px 22px; width: min(520px, 100%); }
+  #results .wrap, #pause .wrap { min-height: 100%; justify-content: center; padding-top: 0; }
+  #results, #pause { padding-bottom: max(16px, env(safe-area-inset-bottom)); }
   .panel h2 { margin: 0 0 12px; font-size: 34px; color: var(--gold); }
   #res-list { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
   #res-list li { display: grid; grid-template-columns: 54px 1fr auto; gap: 10px; padding: 8px 10px; background: #1d2a1f; text-align: left; font-size: 18px; align-items: center; }
@@ -99,6 +109,14 @@
   #res-best { color: var(--dim); margin: 0 0 14px; }
   .btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
   .btn { background: var(--gold); color: #1d2a1f; border: 3px solid #141e15; padding: 12px 20px; font-size: 18px; font-weight: 900; min-height: 48px; }
+  @media (max-height: 500px) {
+    .panel { padding: 10px 16px; }
+    .panel h2 { font-size: 24px; margin-bottom: 8px; }
+    #res-list { gap: 4px; margin-bottom: 6px; }
+    #res-list li { padding: 4px 10px; font-size: 15px; }
+    #res-best { margin-bottom: 8px; font-size: 14px; }
+    .btn { padding: 6px 16px; font-size: 16px; min-height: 44px; }
+  }
   .btn.alt { background: transparent; color: var(--text); border-color: var(--line); }
 
   #rotate { position: fixed; inset: 0; z-index: 60; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; background: var(--bg); text-align: center; padding: 24px; font-size: 22px; font-weight: 700; }

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1d2a1f">
+<title>Critter Kart · Blocky Ridge</title>
+<style>
+  :root { --bg: #1d2a1f; --card: #263627; --line: #3d5440; --text: #f1ead8; --dim: #c9c2ae; --gold: #e8b04a; --red: #c94b3a; }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text);
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+    overscroll-behavior: none; touch-action: none; -webkit-user-select: none; user-select: none;
+    -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;
+  }
+  canvas#game { position: fixed; left: 0; top: 0; display: block; }
+  .px { font-family: "Courier New", monospace; font-weight: 900; letter-spacing: 0.02em; }
+  button { font: inherit; color: inherit; cursor: pointer; }
+
+  #loading { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: var(--bg); z-index: 50; font-size: 22px; }
+
+  /* overlays */
+  .screen { position: fixed; inset: 0; display: none; z-index: 10; overflow-y: auto; touch-action: pan-y;
+    background: linear-gradient(rgba(29,42,31,0.55), rgba(29,42,31,0.88)); padding: max(16px, env(safe-area-inset-top)) 16px 24px; }
+  .screen.on { display: block; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding-top: 44px; display: flex; flex-direction: column; gap: 14px; align-items: center; text-align: center; }
+  h1 { margin: 6px 0 0; font-size: clamp(34px, 7vw, 64px); line-height: 1; color: var(--gold); text-shadow: 4px 4px 0 #000; }
+  .sub { margin: 0; color: var(--dim); font-size: 17px; }
+  #racers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%; }
+  .racer { background: var(--card); border: 3px solid var(--line); padding: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 4px; text-align: left; transition: transform .08s; }
+  .racer:hover, .racer:focus-visible { border-color: var(--gold); outline: none; transform: translateY(-3px); }
+  .racer img { width: 100%; aspect-ratio: 1; max-height: 30vh; object-fit: contain; image-rendering: pixelated; background: #263627; }
+  .rn { font-size: 22px; font-weight: 900; }
+  .rk { color: var(--dim); font-size: 14px; margin-top: -4px; }
+  .stats { display: grid; grid-template-columns: auto 1fr; gap: 3px 8px; align-items: center; font-size: 12px; color: var(--dim); margin-top: 4px; }
+  .bar { height: 8px; background: #141e15; display: block; }
+  .bar i { display: block; height: 100%; background: var(--gold); }
+  .rb { font-size: 13px; color: var(--text); margin-top: 4px; }
+  #controls, #best { color: var(--dim); font-size: 15px; margin: 0; }
+  #controls b { color: var(--text); }
+  @media (max-width: 760px), (max-height: 520px) {
+    #racers { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+    .racer { padding: 6px; } .rn { font-size: 16px; } .rk, .rb { display: none; } .stats { font-size: 10px; }
+    h1 { font-size: 34px; } .sub { font-size: 14px; }
+  }
+  @media (max-width: 520px) { #racers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  /* HUD */
+  #hud { position: fixed; inset: 0; pointer-events: none; display: none; z-index: 5; }
+  #hud.on { display: block; }
+  .chip { position: absolute; background: rgba(29,42,31,0.82); border: 3px solid #141e15; padding: 6px 12px; }
+  #tl { top: max(10px, env(safe-area-inset-top)); left: max(10px, env(safe-area-inset-left)); }
+  #lap { font-size: 22px; } #time { font-size: 16px; color: var(--gold); }
+  #pos { position: absolute; top: max(4px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); font-size: 56px; color: #fff; text-shadow: 4px 4px 0 #141e15, -2px -2px 0 #141e15, 2px -2px 0 #141e15, -2px 2px 0 #141e15; }
+  #item { bottom: 16px; left: max(12px, env(safe-area-inset-left)); width: 70px; height: 70px; padding: 0; display: flex; align-items: center; justify-content: center; opacity: 0.45; }
+  #item.has { opacity: 1; border-color: var(--gold); }
+  #item svg { width: 44px; height: 44px; }
+  #item-n { position: absolute; right: 4px; bottom: 0; font-size: 16px; color: var(--gold); }
+  #mini { position: absolute; right: max(12px, env(safe-area-inset-right)); bottom: 14px; width: 150px; height: 150px; background: rgba(29,42,31,0.7); border: 3px solid #141e15; image-rendering: pixelated; }
+  #msg { position: fixed; left: 50%; top: 32%; transform: translate(-50%, -50%) scale(0.6); opacity: 0; transition: opacity .15s, transform .15s; z-index: 6; pointer-events: none;
+    font-size: 40px; color: #fff; text-shadow: 4px 4px 0 #141e15; white-space: nowrap; }
+  #msg.on { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  #msg.big { font-size: clamp(56px, 12vw, 110px); color: var(--gold); }
+  #wrong { position: fixed; left: 50%; top: 52%; transform: translateX(-50%); display: none; background: var(--red); padding: 8px 18px; font-size: 26px; z-index: 6; border: 3px solid #141e15; }
+  #wrong.on { display: block; }
+  #mute { position: fixed; top: max(10px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); z-index: 20; pointer-events: auto; background: rgba(29,42,31,0.82); border: 3px solid #141e15; width: 44px; height: 44px; padding: 0; display: none; align-items: center; justify-content: center; }
+  body.racing #mute, #menu.on ~ #mute { display: flex; }
+  #mute svg { width: 24px; height: 24px; } #mute.off .wave { display: none; } #mute:not(.off) .x { display: none; }
+
+  /* touch controls */
+  .tc { display: none; position: fixed; z-index: 7; pointer-events: auto; background: rgba(29,42,31,0.55); border: 3px solid rgba(241,234,216,0.55); color: var(--text);
+    align-items: center; justify-content: center; font-weight: 900; font-size: 18px; touch-action: none; }
+  .tc.on { background: rgba(232,176,74,0.6); }
+  body.touch.racing .tc { display: flex; }
+  #t-left, #t-right { bottom: 100px; width: 92px; height: 92px; }
+  #t-left { left: max(14px, env(safe-area-inset-left)); } #t-right { left: calc(max(14px, env(safe-area-inset-left)) + 104px); }
+  #t-brake, #t-item { right: calc(max(14px, env(safe-area-inset-right)) + 170px); width: 92px; height: 70px; }
+  #t-brake { bottom: 16px; } #t-item { bottom: 96px; }
+  #t-left svg, #t-right svg { width: 40px; height: 40px; }
+  body.touch #item { bottom: 16px; }
+  body.touch #mini { width: 120px; height: 120px; }
+
+  /* results & pause */
+  .panel { background: var(--card); border: 3px solid var(--line); padding: 18px 22px; width: min(520px, 100%); margin-top: 8vh; }
+  .panel h2 { margin: 0 0 12px; font-size: 34px; color: var(--gold); }
+  #res-list { list-style: none; margin: 0 0 12px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+  #res-list li { display: grid; grid-template-columns: 54px 1fr auto; gap: 10px; padding: 8px 10px; background: #1d2a1f; text-align: left; font-size: 18px; align-items: center; }
+  #res-list li.me { outline: 3px solid var(--gold); }
+  #res-list i { display: inline-block; width: 14px; height: 14px; margin-right: 8px; border: 2px solid #141e15; vertical-align: -1px; }
+  #res-best { color: var(--dim); margin: 0 0 14px; }
+  .btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .btn { background: var(--gold); color: #1d2a1f; border: 3px solid #141e15; padding: 12px 20px; font-size: 18px; font-weight: 900; min-height: 48px; }
+  .btn.alt { background: transparent; color: var(--text); border-color: var(--line); }
+
+  #rotate { position: fixed; inset: 0; z-index: 60; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; background: var(--bg); text-align: center; padding: 24px; font-size: 22px; font-weight: 700; }
+  #rotate.on { display: flex; }
+  #rotate .phone { width: 54px; height: 92px; border: 4px solid #fff; border-radius: 12px; animation: tilt 1.8s ease-in-out infinite; }
+  @keyframes tilt { 0%, 30% { transform: rotate(0deg); } 60%, 100% { transform: rotate(90deg); } }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="loading" class="px">Building Blocky Ridge…</div>
+
+<section id="menu" class="screen" aria-label="Choose a racer">
+  <div class="wrap">
+    <h1 class="px">CRITTER KART</h1>
+    <p class="sub">Blocky Ridge · 3 laps · pick your critter</p>
+    <div id="racers"></div>
+    <p id="controls"></p>
+    <p id="best"></p>
+  </div>
+</section>
+
+<div id="hud">
+  <div id="tl" class="chip px"><div id="lap">Lap 1/3</div><div id="time">0:00.0</div></div>
+  <div id="pos" class="px">4th</div>
+  <div id="item" class="chip">
+    <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+      <rect x="4" y="2" width="8" height="2" fill="#6b4a2b"/><rect x="2" y="4" width="12" height="3" fill="#6b4a2b"/>
+      <rect x="7" y="0" width="2" height="2" fill="#5a3b26"/>
+      <rect x="3" y="7" width="10" height="4" fill="#c98a3a"/><rect x="4" y="11" width="8" height="2" fill="#c98a3a"/><rect x="6" y="13" width="4" height="2" fill="#c98a3a"/>
+      <rect x="4" y="8" width="2" height="2" fill="#e3ae62"/>
+    </svg>
+    <span id="item-n" class="px"></span>
+  </div>
+  <canvas id="mini"></canvas>
+  <div id="wrong" class="px">WRONG WAY</div>
+</div>
+<div id="msg" class="px"></div>
+
+<button id="t-left" class="tc" aria-label="Steer left"><svg viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true"><path d="M7 1 L2 5 L7 9 Z" fill="currentColor"/></svg></button>
+<button id="t-right" class="tc" aria-label="Steer right"><svg viewBox="0 0 10 10" shape-rendering="crispEdges" aria-hidden="true"><path d="M3 1 L8 5 L3 9 Z" fill="currentColor"/></svg></button>
+<button id="t-item" class="tc px">ACORN</button>
+<button id="t-brake" class="tc px">BRAKE</button>
+
+<section id="results" class="screen" aria-label="Race results">
+  <div class="wrap"><div class="panel">
+    <h2 id="res-title" class="px">Results</h2>
+    <ol id="res-list"></ol>
+    <p id="res-best"></p>
+    <div class="btns"><button id="again" class="btn px">Race again</button><button id="change" class="btn alt px">Change racer</button></div>
+  </div></div>
+</section>
+
+<section id="pause" class="screen" aria-label="Paused">
+  <div class="wrap"><div class="panel">
+    <h2 class="px">Paused</h2>
+    <div class="btns"><button id="resume" class="btn px">Resume</button><button id="quit" class="btn alt px">Quit to menu</button></div>
+  </div></div>
+</section>
+
+<button id="mute" aria-label="Sound on or off">
+  <svg viewBox="0 0 24 24" fill="none" stroke="#f1ead8" stroke-width="2.4" aria-hidden="true">
+    <path d="M4 9h4l5-4v14l-5-4H4z" fill="#f1ead8"/><path class="wave" d="M16 8c2 2 2 6 0 8M19 5c4 4 4 10 0 14"/><path class="x" d="M16 9l6 6M22 9l-6 6"/>
+  </svg>
+</button>
+
+<div id="rotate"><div class="phone"></div><div>Turn your phone sideways</div></div>
+
+<script src="game.js"></script>
+<script>
+  if ('serviceWorker' in navigator && location.protocol === 'https:') {
+    navigator.serviceWorker.register('sw.js').catch(function () {});
+  }
+</script>
+</body>
+</html>

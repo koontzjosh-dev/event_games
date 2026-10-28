@@ -32,7 +32,7 @@
   h1 { margin: 6px 0 0; font-size: clamp(34px, 7vw, 64px); line-height: 1; color: var(--gold); text-shadow: 4px 4px 0 #000; }
   .sub { margin: 0; color: var(--dim); font-size: 17px; }
   #racers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%; }
-  #tracks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; width: 100%; }
+  #tracks { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; width: 100%; }
   .track { background: var(--card); border: 3px solid var(--line); padding: 8px; display: grid; grid-template-columns: 76px 1fr; grid-template-rows: auto 1fr auto; column-gap: 10px; text-align: left; align-items: start; }
   .track img { grid-row: 1 / 4; width: 76px; height: 76px; image-rendering: pixelated; }
   .track .tn { font-size: 18px; font-weight: 900; }
@@ -65,7 +65,7 @@
     .track { grid-template-columns: 48px 1fr; padding: 6px; } .track img { width: 48px; height: 48px; }
     .track .tn { font-size: 14px; } .track .tb { display: none; }
   }
-  @media (max-width: 520px) { #racers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { #racers, #tracks { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
   /* HUD */
   #hud { position: fixed; inset: 0; pointer-events: none; display: none; z-index: 5; }
@@ -155,7 +155,7 @@
 <section id="menu" class="screen" aria-label="Choose a racer">
   <div class="wrap">
     <h1 class="px">CRITTER KART</h1>
-    <p class="sub">Pick a track, then pick your critter · 3 laps</p>
+    <p class="sub">Pick a track, then pick your critter</p>
     <div id="tracks"></div>
     <div id="speeds" role="group" aria-label="Speed"></div>
     <div id="racers"></div>
